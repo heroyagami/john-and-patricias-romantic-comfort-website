@@ -43,6 +43,16 @@ export class Room {
     this.isNight = false;
 
     const items = this.experience.resources.items;
+    const oldHouseGroup = this.model.getObjectByName("First_House_Baked");
+    oldHouseGroup?.removeFromParent();
+
+    const houseReplacement = items.houseReplacement?.scene;
+    if (houseReplacement) {
+      while (houseReplacement.children.length) {
+        this.model.add(houseReplacement.children[0]);
+      }
+    }
+
     const ordinalTextureMap = {
       First: items.firstTexture,
       Second: items.secondTexture,

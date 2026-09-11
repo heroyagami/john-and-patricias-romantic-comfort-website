@@ -11,6 +11,11 @@ export default [
     path: "/models/Room.glb",
   },
   {
+    name: "houseReplacement",
+    type: "glbModel",
+    path: "/models/HouseReplacement.glb",
+  },
+  {
     name: "hitboxes",
     type: "glbModel",
     path: "/models/Hitboxes.glb",
