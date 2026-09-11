@@ -1,36 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link
-      rel="icon"
-      type="image/png"
-      href="/media/favicon-96x96.png"
-      sizes="96x96"
-    />
+    <link rel="icon" type="image/png" href="/media/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/media/favicon.svg" />
     <link rel="shortcut icon" href="/media/favicon.ico" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/media/apple-touch-icon.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/apple-touch-icon.png" />
     <link rel="manifest" href="/media/site.webmanifest" />
 
-    <meta name="language" content="English" />
-    <meta property="og:locale" content="en_US" />
+    <meta name="language" content="Chinese" />
+    <meta property="og:locale" content="zh_CN" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/media/og-image.webp" />
-
+    <meta property="og:title" content="吴昊 × 舒倩 · 婚礼邀请函" />
     <meta
       property="og:description"
-      content="John and Patricia's comfort website for couples therapy and learning about attachment styles!!"
+      content="2026年10月2日中午12:00，我们结婚啦。诚挚邀请你来见证我们的婚礼。"
     />
 
-    <title>John & Particia's Comfort Space</title>
+    <title>吴昊 × 舒倩 · 婚礼邀请函</title>
   </head>
   <body>
     <div class="preloader">
@@ -42,25 +33,18 @@
 
         <div class="preloader__intro">
           <p class="preloader__description">
-            This website is a current prototype of an idealized digital twin
-            space for a couple. It's designed to hold other digital mental
-            health interventions like homework as well as provide a sense of
-            comfort, acting like a holding enviornment. Other information is
-            also provided through analogies, symbols, and metaphors to make the
-            site more engaging.
+            吴昊 × 舒倩<br /><br />
+            我们结婚啦。<br />
+            想请你来吃顿喜酒，和我们一起见证这个重要的日子。<br /><br />
+            2026年10月2日 · 中午12:00<br />
+            湖北省咸宁市崇阳县 · 詹氏糯米酒超市对面
           </p>
           <div class="preloader__buttons">
-            <button
-              id="enter-btn"
-              class="preloader__btn preloader__btn--primary"
-            >
-              Enter
+            <button id="enter-btn" class="preloader__btn preloader__btn--primary">
+              进入我们的婚礼
             </button>
-            <button
-              id="enter-silent-btn"
-              class="preloader__btn preloader__btn--secondary"
-            >
-              Enter without sound
+            <button id="enter-silent-btn" class="preloader__btn preloader__btn--secondary">
+              静音进入
             </button>
           </div>
         </div>
@@ -71,13 +55,13 @@
       <canvas id="experience-canvas"></canvas>
     </div>
 
-    <button id="back-btn" class="back-btn">&#8592; Back</button>
+    <button id="back-btn" class="back-btn">&#8592; 返回</button>
 
     <div class="top-right-controls">
-      <button id="day-night-toggle" class="day-night-btn" data-mode="day">
+      <button id="day-night-toggle" class="day-night-btn" data-mode="day" aria-label="切换昼夜">
         <span class="day-night-btn__icon">&#9790;</span>
       </button>
-      <button id="info-btn" class="info-btn">i</button>
+      <button id="info-btn" class="info-btn" aria-label="婚礼指南">i</button>
     </div>
 
     <script type="module" src="/src/main.js"></script>
