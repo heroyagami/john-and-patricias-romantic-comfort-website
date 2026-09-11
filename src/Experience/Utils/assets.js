@@ -13,7 +13,7 @@ export default [
   {
     name: "houseReplacement",
     type: "glbModel",
-    path: "/models/HouseReplacement.glb",
+    path: "/models/HouseReplacement-v3.glb",
   },
   {
     name: "hitboxes",
@@ -52,8 +52,8 @@ export default [
   },
   {
     name: "fifthTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/fifth-background_day.${ext}`,
+    type: "texture",
+    path: "/textures/day/fifth-background_day.webp",
   },
   {
     name: "sixthTexture",
@@ -97,8 +97,8 @@ export default [
   },
   {
     name: "fifthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/fifth-background_night.${ext}`,
+    type: "texture",
+    path: "/textures/night/fifth-background_night.webp",
   },
   {
     name: "sixthNightTexture",

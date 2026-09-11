@@ -44,14 +44,13 @@ export class Room {
     this.isNight = false;
 
     const items = this.experience.resources.items;
-    const oldHouseGroup = this.model.getObjectByName("First_House_Baked");
-    oldHouseGroup?.removeFromParent();
+    this.model.getObjectByName("First_House_Baked")?.removeFromParent();
 
-    const houseReplacement = items.houseReplacement?.scene;
-    if (houseReplacement) {
-      while (houseReplacement.children.length) {
-        this.model.add(houseReplacement.children[0]);
-      }
+    const weddingHouse =
+      items.houseReplacement?.scene.getObjectByName("WeddingHouse");
+    if (weddingHouse) {
+      weddingHouse.removeFromParent();
+      this.model.add(weddingHouse);
     }
 
     const ordinalTextureMap = {
