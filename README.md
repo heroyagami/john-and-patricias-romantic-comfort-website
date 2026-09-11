@@ -1,8 +1,8 @@
-# 💑 John and Patricia's Couple's Therapy Website 🏡
+# 💍 吴昊 × 舒倩 · 3D 婚礼邀请函
 
-**[Live site](https://john-and-patricias-comfort-site-about-attachment-styles.com/)** | **[Tutorial](https://youtu.be/w2MnkhTGJQA)**
+当前版本位于 `wedding-v1` 分支，是基于原 Three.js 场景改造的婚礼邀请函 V1。
 
-This repo contains code of John and Patricia's comfort website for couples therapy about attachment style!! It's a prototype website. John and Patricia are not real people. It's a website created with [Blender](https://www.blender.org/), [Three.js](https://threejs.org/).
+已完成婚礼首屏、实时倒计时、婚礼信息与流程、RSVP 本地预览，以及 3D 场景中的婚礼化交互文案。V1 暂不修改原始 3D 模型与贴图。
 
 ![Page screenshot](public/media/og-image.webp?raw=true "Page Screenshot")
 

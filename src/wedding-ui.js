@@ -22,7 +22,7 @@ export function mountWeddingUI() {
       <span class="wedding-card__countdown" id="wedding-countdown"></span>
     </button>
 
-    <div class="wedding-sheet" id="wedding-sheet" aria-hidden="true">
+    <div class="wedding-sheet" id="wedding-sheet" role="dialog" aria-modal="true" aria-label="婚礼详情与赴约登记" aria-hidden="true">
       <div class="wedding-sheet__backdrop" data-close-sheet></div>
       <section class="wedding-sheet__panel">
         <button class="wedding-sheet__close" data-close-sheet aria-label="关闭">×</button>
@@ -68,6 +68,8 @@ export function mountWeddingUI() {
   const card = root.querySelector("#wedding-card");
   const form = root.querySelector("#rsvp-form");
   const status = root.querySelector("#rsvp-status");
+  const attendance = form.elements.attendance;
+  const guests = form.elements.guests;
 
   const updateCountdown = () => {
     countdown.textContent = `距离婚礼还有 ${getCountdown()}`;
@@ -78,6 +80,7 @@ export function mountWeddingUI() {
   const openSheet = () => {
     sheet.classList.add("is-open");
     sheet.setAttribute("aria-hidden", "false");
+    root.querySelector("[data-close-sheet]").focus();
   };
   const closeSheet = () => {
     sheet.classList.remove("is-open");
@@ -88,6 +91,15 @@ export function mountWeddingUI() {
   root.querySelectorAll("[data-close-sheet]").forEach((el) =>
     el.addEventListener("click", closeSheet),
   );
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sheet.classList.contains("is-open")) closeSheet();
+  });
+
+  attendance.addEventListener("change", () => {
+    const cannotAttend = attendance.value === "no";
+    guests.disabled = cannotAttend;
+    guests.value = cannotAttend ? "0" : guests.value === "0" ? "1" : guests.value;
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -96,6 +108,9 @@ export function mountWeddingUI() {
       "wuhao-shuqian-rsvp-v1",
       JSON.stringify({ ...data, submittedAt: new Date().toISOString() }),
     );
-    status.textContent = "收到啦 ❤️ 10月2日，我们等你。";
+    status.textContent =
+      data.attendance === "yes"
+        ? "收到啦 ❤️ 10月2日，我们等你。"
+        : "收到你的心意啦 ❤️ 谢谢你的祝福。";
   });
 }

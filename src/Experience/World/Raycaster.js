@@ -17,16 +17,16 @@ const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
 
 const CHARACTER_DATA = {
   Fourth_Carl_Raycaster: {
-    title: "Carl Fredricksen",
-    text: "Ellie was a very loving, securely attached person in the movie (from what we can tell). She acted as a secure base for Carl. While Carl was in the relationship he was secure, but showed signs of anxious attachment. When Carl lost Ellie, that anxious attachment swung deeply to an avoidant style attachment to protect himself from future pain. By the end of the movie though, Carl releases the house, suggesting letting go of the past and starts becoming warm again, showing an earned secure attachment style.",
+    title: "长久相伴",
+    text: "婚礼不是故事的终点，而是往后每一个普通日子的开始。愿我们在岁月里彼此照顾，把柴米油盐过成温柔的长久相伴。",
   },
   Fourth_Russell_Raycaster: {
-    title: "Russell",
-    text: "Russell is anxiously attached, he constantly keeps showing up even when shooed off. He immediately tries to show his usefulness and constantly tries to read Carl's mood and emotional state in order to help with it even when not asked. His father was largely absent and inconsistent, leading to Russell having this attachment style.",
+    title: "一路同行",
+    text: "一路走来，我们因为家人与朋友的陪伴而更加笃定。谢谢你来到这里，也谢谢你见证吴昊和舒倩共同开启人生的新篇章。",
   },
   Fourth_Dug_Raycaster: {
-    title: "Dug",
-    text: 'Dug is pretty interesting, he seems to have an anxious-preoccupied attachment style by the fact that he forms bonds really quickly given his quote, "My name is Dug. I have just met you, and I love you!" Over the film though, he appears to end with an earned-secure attachment.',
+    title: "简单欢喜",
+    text: "最好的幸福，也许就是有人分享每一件小事。愿婚礼当天有笑声、有拥抱，也有与你重逢或初见的简单欢喜。",
   },
 };
 
@@ -394,6 +394,15 @@ export class Raycaster {
         display: block;
         animation: hintSlide 1.6s ease-in-out infinite;
       }
+      #house-drag-hint .hint-copy {
+        position: absolute;
+        top: 34px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+      }
       @keyframes hintSlide {
         0%, 100% { transform: translateX(-10px); }
         50%       { transform: translateX(10px); }
@@ -407,6 +416,7 @@ export class Raycaster {
       <span class="hint-arrow">←</span>
       <span class="hint-icon"><svg width="22" height="26" viewBox="0 0 550 650" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:block"><path d="M349.738 0C239.875 0 149.738 90.1367 149.738 200V265.625C106.672 240.43 50.7148 248.926 20.0507 289.844C-12.9571 333.789 -4.3633 396.777 39.582 429.688V430.469H40.3632L174.738 528.906V650H524.738V517.969C525.227 516.992 525.715 516.113 526.301 514.844C529.133 509.18 532.16 501.172 535.676 490.625C542.707 469.629 549.738 439.258 549.738 400V200C549.738 90.1367 459.602 0 349.738 0ZM349.738 50C432.355 50 499.738 117.383 499.738 200V400C499.738 433.594 494.27 458.594 488.801 475C486.066 483.203 482.844 489.16 480.988 492.969C480.012 494.824 479.914 496.094 479.426 496.875C479.23 497.266 478.742 497.559 478.645 497.656L482.551 500H220.832L214.582 495.312L70.0507 389.844C47.6875 373.145 43.1953 342.578 59.8945 320.312C76.6914 297.949 107.16 293.457 129.426 310.156H130.207L160.676 331.25L199.738 358.594V200C199.738 117.383 267.121 50 349.738 50ZM224.738 550H474.738V600H224.738V550Z"/></svg></span>
       <span class="hint-arrow">→</span>
+      <span class="hint-copy">左右拖动 · 翻看我们的故事</span>
     `;
     document.body.appendChild(this._dragHint);
   }
@@ -520,7 +530,7 @@ export class Raycaster {
   _createMessagesBackBtn() {
     this._messagesBackBtn = document.createElement("button");
     this._messagesBackBtn.className = "back-btn";
-    this._messagesBackBtn.innerHTML = "&#8592; Back";
+    this._messagesBackBtn.innerHTML = "&#8592; 返回故事墙";
     document.body.appendChild(this._messagesBackBtn);
     this._messagesBackBtn.addEventListener("click", () => this.goBackToHouse());
   }
@@ -816,11 +826,11 @@ export class Raycaster {
 
   _createHitboxMarkers() {
     const LABELS = {
-      Photos_Raycaster_Hitbox: "Photos",
-      Calendar_Raycaster_Hitbox: "Needs & Intimacy Calendar",
-      Characters_Raycaster_Hitbox: "Character Attachment Styles",
-      House_Raycaster_Hitbox: "Learning Attachment Styles",
-      Music_Raycaster_Hitbox: "Music",
+      Photos_Raycaster_Hitbox: "婚礼照片",
+      Calendar_Raycaster_Hitbox: "我们的婚礼日历",
+      Characters_Raycaster_Hitbox: "关于相伴的三个愿望",
+      House_Raycaster_Hitbox: "我们的故事墙",
+      Music_Raycaster_Hitbox: "婚礼音乐",
     };
 
     const Y_OFFSETS = {
@@ -1008,10 +1018,10 @@ export class Raycaster {
     if (hoverName !== this._currentHoveredName) {
       this._currentHoveredName = hoverName;
       const labels = {
-        Photos_Raycaster_Hitbox: "Photos",
-        Calendar_Raycaster_Hitbox: "Needs & Intimacy Calendar",
-        Characters_Raycaster_Hitbox: "Character Attachment Styles",
-        House_Raycaster_Hitbox: "Learning Attachment Styles",
+        Photos_Raycaster_Hitbox: "看看我们的婚礼照片",
+        Calendar_Raycaster_Hitbox: "打开我们的婚礼日历",
+        Characters_Raycaster_Hitbox: "读一读关于相伴的愿望",
+        House_Raycaster_Hitbox: "走进我们的故事墙",
       };
       const text = hoverName ? labels[hoverName] : null;
       if (text) this._showHoverLabel(text);
