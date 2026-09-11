@@ -3,6 +3,7 @@ import {
   texture,
   uv,
   positionWorld,
+  normalWorld,
   vec2,
   vec3,
   vec4,
@@ -208,7 +209,40 @@ export class Room {
       const ordinalTex = ordinalTextureMap[ordinal];
       const ordinalNightTex = ordinalNightTextureMap[ordinal];
       const alphaTest = ordinal === "Fourth" ? 0.5 : 0.2;
-      if (ordinalTex && ordinalNightTex) {
+      const weddingMaterialName = old.name ?? "";
+      const weddingPalettes = {
+        婚房_台阶混凝土: { color: [0.25, 0.24, 0.22], scale: 1.2, variation: 0.1 },
+        婚房_褐色门窗套: { color: [0.28, 0.12, 0.055], scale: 2.5, variation: 0.06 },
+        婚房_米白真石漆: { color: [0.52, 0.46, 0.36], scale: 1.8, variation: 0.13 },
+        婚房_深灰外墙: { color: [0.14, 0.13, 0.12], scale: 1.7, variation: 0.09 },
+        婚房_深灰陶瓦: { color: [0.085, 0.08, 0.09], scale: 5, variation: 0.13 },
+        婚房_檐口深灰: { color: [0.065, 0.06, 0.055], scale: 2, variation: 0.05 },
+        婚房_灰蓝栏杆: { color: [0.13, 0.19, 0.2], scale: 2, variation: 0.035 },
+        婚房_LOE玻璃: { color: [0.13, 0.25, 0.29], scale: 1.5, variation: 0.04 },
+      };
+      const weddingPalette = weddingPalettes[weddingMaterialName];
+
+      if (weddingPalette) {
+        const surfaceNoise = mx_noise_float(
+          positionWorld.mul(weddingPalette.scale),
+        )
+          .mul(weddingPalette.variation)
+          .add(1.0);
+        const directionalLight = normalWorld
+          .dot(vec3(0.38, -0.55, 0.74))
+          .max(0.0)
+          .mul(0.38)
+          .add(0.62);
+        mat.colorNode = vec3(...weddingPalette.color)
+          .mul(surfaceNoise)
+          .mul(directionalLight)
+          .mul(softGobo.min(softGobo2).min(softGobo3));
+        if (weddingMaterialName === "婚房_LOE玻璃") {
+          mat.transparent = true;
+          mat.opacity = 0.42;
+          mat.depthWrite = false;
+        }
+      } else if (ordinalTex && ordinalNightTex) {
         const daySample = texture(ordinalTex, uv());
         const nightSample = texture(ordinalNightTex, uv());
         const blended = mix(daySample, nightSample, this.uDayNight);
