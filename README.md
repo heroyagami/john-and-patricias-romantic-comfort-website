@@ -2,7 +2,13 @@
 
 当前版本位于 `wedding-v1` 分支，是基于原 Three.js 场景改造的婚礼邀请函 V1。
 
-已完成婚礼首屏、实时倒计时、婚礼信息与流程、RSVP 本地预览，以及 3D 场景中的婚礼化交互文案。V1 暂不修改原始 3D 模型与贴图。
+已完成婚礼首屏、实时倒计时、婚礼信息与流程、RSVP 本地预览、3D 场景中的婚礼化交互文案，以及婚房模型与墙面姓名贴图替换。
+
+## 在线预览
+
+- 腾讯云 CloudBase（国内访问）：https://heroyagami-d7gncvbum9cd65c5c-1254284182.tcloudbaseapp.com/
+- CloudBase 环境：`heroyagami-d7gncvbum9cd65c5c`（体验版）
+- 部署方式：运行 `npm run build` 后，将 `dist` 发布到 CloudBase 静态网站托管。
 
 ![Page screenshot](public/media/og-image.webp?raw=true "Page Screenshot")
 
