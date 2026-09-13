@@ -1,0 +1,51 @@
+.wedding-ui,
+.wedding-sheet,
+.wedding-sheet button,
+.wedding-sheet input,
+.wedding-sheet select,
+.wedding-sheet textarea {
+  font-family: "Noto Serif SC Variable", "Songti SC", "STSong", serif;
+}
+
+.wedding-sheet {
+  z-index: 400;
+}
+
+.wedding-sheet__close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(143, 111, 72, 0.38);
+  border-radius: 50%;
+  background: rgba(255, 252, 246, 0.96);
+  box-shadow: 0 6px 20px rgba(67, 49, 32, 0.16);
+  color: #46382c;
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wedding-sheet__close:active {
+  transform: scale(0.94);
+  background: #fff;
+}
+
+@media (max-width: 640px) {
+  .wedding-sheet__panel {
+    padding-top: 72px;
+  }
+
+  .wedding-sheet__close {
+    top: max(16px, env(safe-area-inset-top));
+    right: 16px;
+  }
+}

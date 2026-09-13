@@ -1,8 +1,10 @@
 import { Experience } from "./Experience/Experience";
 import { Modal } from "./Experience/Modal";
 import { mountWeddingUI } from "./wedding-ui";
+import "@fontsource-variable/noto-serif-sc";
 import "./style.css";
 import "./styles/wedding.css";
+import "./styles/mobile-fixes.css";
 
 const experience = new Experience();
 mountWeddingUI();
