@@ -22,7 +22,7 @@ export function mountWeddingUI() {
       <span class="wedding-card__countdown" id="wedding-countdown"></span>
     </button>
 
-    <div class="wedding-sheet" id="wedding-sheet" role="dialog" aria-modal="true" aria-label="婚礼详情与赴约登记" aria-hidden="true">
+    <div class="wedding-sheet" id="wedding-sheet" role="dialog" aria-modal="true" aria-label="婚礼详情" aria-hidden="true">
       <div class="wedding-sheet__backdrop" data-close-sheet></div>
       <section class="wedding-sheet__panel">
         <button class="wedding-sheet__close" data-close-sheet aria-label="关闭">×</button>
@@ -32,32 +32,19 @@ export function mountWeddingUI() {
 
         <div class="wedding-sheet__meta">
           <div><small>时间</small><strong>${wedding.dateDisplay}</strong></div>
-          <div><small>地点</small><strong>${wedding.location}</strong></div>
+          <div class="wedding-sheet__location">
+            <small>地点</small>
+            <strong>${wedding.location}</strong>
+            <a class="wedding-sheet__map-link" href="${wedding.mapUrl}" target="_blank" rel="noopener noreferrer">
+              <span aria-hidden="true">⌖</span> 腾讯地图导航
+            </a>
+          </div>
         </div>
 
         <div class="wedding-sheet__schedule">
           ${wedding.schedule.map((item) => `<div><span>${item.time}</span><strong>${item.title}</strong></div>`).join("")}
         </div>
 
-        <form class="rsvp-form" id="rsvp-form">
-          <div class="rsvp-form__heading">
-            <p class="wedding-sheet__eyebrow">RSVP</p>
-            <h2>赴约登记</h2>
-          </div>
-          <input name="name" required placeholder="你的姓名" />
-          <div class="rsvp-form__row">
-            <select name="attendance" required>
-              <option value="">是否参加</option>
-              <option value="yes">一定到</option>
-              <option value="no">很遗憾不能到</option>
-            </select>
-            <input name="guests" type="number" min="1" max="20" value="1" placeholder="人数" />
-          </div>
-          <input name="phone" placeholder="联系电话（可选）" />
-          <textarea name="message" rows="3" placeholder="想对我们说的话（可选）"></textarea>
-          <button type="submit">确认赴约</button>
-          <p class="rsvp-form__status" id="rsvp-status">V1 预览版：暂存在当前设备，下一版接云端宾客名单。</p>
-        </form>
       </section>
     </div>
   `;
@@ -66,10 +53,6 @@ export function mountWeddingUI() {
   const countdown = root.querySelector("#wedding-countdown");
   const sheet = root.querySelector("#wedding-sheet");
   const card = root.querySelector("#wedding-card");
-  const form = root.querySelector("#rsvp-form");
-  const status = root.querySelector("#rsvp-status");
-  const attendance = form.elements.attendance;
-  const guests = form.elements.guests;
 
   const updateCountdown = () => {
     countdown.textContent = `距离婚礼还有 ${getCountdown()}`;
@@ -95,22 +78,4 @@ export function mountWeddingUI() {
     if (event.key === "Escape" && sheet.classList.contains("is-open")) closeSheet();
   });
 
-  attendance.addEventListener("change", () => {
-    const cannotAttend = attendance.value === "no";
-    guests.disabled = cannotAttend;
-    guests.value = cannotAttend ? "0" : guests.value === "0" ? "1" : guests.value;
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    localStorage.setItem(
-      "wuhao-shuqian-rsvp-v1",
-      JSON.stringify({ ...data, submittedAt: new Date().toISOString() }),
-    );
-    status.textContent =
-      data.attendance === "yes"
-        ? "收到啦 ❤️ 10月2日，我们等你。"
-        : "收到你的心意啦 ❤️ 谢谢你的祝福。";
-  });
 }
