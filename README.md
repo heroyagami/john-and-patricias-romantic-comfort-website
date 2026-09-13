@@ -6,9 +6,9 @@
 
 ## 在线预览
 
-- 腾讯云 CloudBase（国内访问）：https://heroyagami-d7gncvbum9cd65c5c-1254284182.tcloudbaseapp.com/
-- CloudBase 环境：`heroyagami-d7gncvbum9cd65c5c`（体验版）
-- 部署方式：运行 `npm run build` 后，将 `dist` 发布到 CloudBase 静态网站托管。
+- Vercel：https://wuhao-shuqian-wedding.vercel.app/
+- 腾讯云 CloudBase 备用地址：https://heroyagami-d7gncvbum9cd65c5c-1254284182.tcloudbaseapp.com/
+- 腾讯云免费环境：`heroyagami-d7gncvbum9cd65c5c`（体验版）
 
 ![Page screenshot](public/media/og-image.webp?raw=true "Page Screenshot")
 

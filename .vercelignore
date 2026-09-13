@@ -1,0 +1,7 @@
+Blender File/
+.openai/
+.claude/
+dist/
+node_modules/
+*.blend
+*.blend1
