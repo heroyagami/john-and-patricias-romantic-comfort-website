@@ -6,6 +6,8 @@ export const wedding = {
   location: "湖北省咸宁市崇阳县 · 詹氏糯米酒超市对面",
   mapUrl:
     "https://apis.map.qq.com/uri/v1/search?keyword=%E8%A9%B9%E6%B0%8F%E7%B3%AF%E7%B1%B3%E9%85%92%E8%B6%85%E5%B8%82&region=%E5%B4%87%E9%98%B3%E5%8E%BF&referer=wuhao-shuqian-wedding",
+  amapUrl:
+    "https://uri.amap.com/search?keyword=%E8%A9%B9%E6%B0%8F%E7%B3%AF%E7%B1%B3%E9%85%92%E8%B6%85%E5%B8%82&city=%E5%B4%87%E9%98%B3%E5%8E%BF&src=wuhao-shuqian-wedding&coordinate=gaode&callnative=1",
   invitation:
     "我们结婚啦。想请你来吃顿喜酒，和我们一起见证这个重要的日子。",
   schedule: [

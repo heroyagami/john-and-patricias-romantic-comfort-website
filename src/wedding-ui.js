@@ -35,9 +35,17 @@ export function mountWeddingUI() {
           <div class="wedding-sheet__location">
             <small>地点</small>
             <strong>${wedding.location}</strong>
-            <a class="wedding-sheet__map-link" href="${wedding.mapUrl}" target="_blank" rel="noopener noreferrer">
-              <span aria-hidden="true">⌖</span> 腾讯地图导航
+            <a class="wedding-map-preview" href="${wedding.mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="在腾讯地图中查看婚礼地点">
+              <iframe src="${wedding.mapUrl}" title="婚礼地点地图预览" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+              <span class="wedding-map-preview__pin" aria-hidden="true"></span>
+              <span class="wedding-map-preview__label">婚礼地点 · 点击查看</span>
             </a>
+            <div class="wedding-map-actions">
+              <a class="wedding-sheet__map-link wedding-sheet__map-link--primary" href="${wedding.mapUrl}" target="_blank" rel="noopener noreferrer">腾讯地图</a>
+              <a class="wedding-sheet__map-link" href="${wedding.amapUrl}" target="_blank" rel="noopener noreferrer">高德地图</a>
+              <button class="wedding-sheet__map-link wedding-sheet__map-copy" type="button">复制地址</button>
+            </div>
+            <span class="wedding-map-status" role="status" aria-live="polite"></span>
           </div>
         </div>
 
@@ -53,6 +61,8 @@ export function mountWeddingUI() {
   const countdown = root.querySelector("#wedding-countdown");
   const sheet = root.querySelector("#wedding-sheet");
   const card = root.querySelector("#wedding-card");
+  const copyAddress = root.querySelector(".wedding-sheet__map-copy");
+  const mapStatus = root.querySelector(".wedding-map-status");
 
   const updateCountdown = () => {
     countdown.textContent = `距离婚礼还有 ${getCountdown()}`;
@@ -76,6 +86,25 @@ export function mountWeddingUI() {
   );
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && sheet.classList.contains("is-open")) closeSheet();
+  });
+
+  copyAddress.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(wedding.location);
+    } catch {
+      const input = document.createElement("textarea");
+      input.value = wedding.location;
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      input.remove();
+    }
+    mapStatus.textContent = "地址已复制，可粘贴到任意地图搜索";
+    setTimeout(() => {
+      mapStatus.textContent = "";
+    }, 2600);
   });
 
 }
