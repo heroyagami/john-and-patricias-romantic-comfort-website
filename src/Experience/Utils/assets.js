@@ -3,6 +3,7 @@ const isIOS =
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 const ext = isIOS ? "ktx2" : "webp";
+const weddingPhotoVersion = "20260918-2";
 
 export default [
   {
@@ -37,8 +38,8 @@ export default [
   },
   {
     name: "secondTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/second-photos_day.${ext}`,
+    type: "texture",
+    path: `/textures/day/second-photos_day.webp?v=${weddingPhotoVersion}`,
   },
   {
     name: "thirdTexture",
@@ -82,8 +83,8 @@ export default [
   },
   {
     name: "secondNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/second-photos_night.${ext}`,
+    type: "texture",
+    path: `/textures/night/second-photos_night.webp?v=${weddingPhotoVersion}`,
   },
   {
     name: "thirdNightTexture",
