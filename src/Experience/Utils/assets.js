@@ -3,7 +3,7 @@ const isIOS =
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 const ext = isIOS ? "ktx2" : "webp";
-const weddingPhotoVersion = "20260918-2";
+const weddingPhotoVersion = "20260918-3";
 
 export default [
   {
