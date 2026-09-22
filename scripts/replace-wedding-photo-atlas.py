@@ -17,8 +17,11 @@ SANS_FONT = Path(r"C:\Windows\Fonts\msyh.ttc")
 SLOTS = [
     {"source": "4.png", "box": (2010, 300, 3068, 1088), "rotate": 0, "center": (0.5, 0.48)},
     {"source": "2-1.png", "box": (0, 1904, 1056, 2932), "rotate": 270, "center": (0.5, 0.44)},
-    {"source": "5.png", "box": (2424, 2108, 3454, 3120), "rotate": 270, "center": (0.5, 0.43)},
-    {"source": "8.png", "box": (2528, 3092, 3542, 4096), "rotate": 270, "center": (0.5, 0.38)},
+    # These two UV islands extend farther to the right than the original
+    # replacement rectangles. Cover the full islands to eliminate the visible
+    # strip between each print and its frame.
+    {"source": "7.png", "box": (2424, 2108, 3530, 3120), "rotate": 270, "center": (0.5, 0.43)},
+    {"source": "8.png", "box": (2528, 3092, 3640, 4096), "rotate": 270, "center": (0.5, 0.12)},
 ]
 
 QUOTE_BOX = (0, 872, 1022, 1888)
@@ -48,25 +51,14 @@ def night_treatment(photo: Image.Image) -> Image.Image:
 def make_quote_card(size: tuple[int, int]) -> Image.Image:
     card = Image.new("RGB", size, (239, 226, 207))
     draw = ImageDraw.Draw(card)
-    title_font = ImageFont.truetype(str(SERIF_FONT), 74)
-    signature_font = ImageFont.truetype(str(SANS_FONT), 34)
-    ink = (83, 67, 48)
-    lines = ["从今往后", "朝暮与共"]
-    line_boxes = [draw.textbbox((0, 0), line, font=title_font) for line in lines]
-    block_height = sum(box[3] - box[1] for box in line_boxes) + 44
-    y = (size[1] - block_height) // 2 - 40
-    for line, box in zip(lines, line_boxes):
-        width = box[2] - box[0]
-        draw.text(((size[0] - width) / 2, y), line, font=title_font, fill=ink)
-        y += box[3] - box[1] + 44
-    signature = "— 吴昊 & 舒倩"
-    signature_box = draw.textbbox((0, 0), signature, font=signature_font)
-    draw.text(
-        (size[0] - (signature_box[2] - signature_box[0]) - 72, size[1] - 112),
-        signature,
-        font=signature_font,
-        fill=(111, 91, 66),
-    )
+    # The eight-character vow now lives directly on the wall. Keep this frame
+    # intentionally quiet with a small linked-rings motif.
+    ink = (126, 103, 77)
+    cx, cy = size[0] // 2, size[1] // 2
+    radius = min(size) // 11
+    draw.ellipse((cx - radius * 1.35, cy - radius, cx + radius * 0.65, cy + radius), outline=ink, width=5)
+    draw.ellipse((cx - radius * 0.65, cy - radius, cx + radius * 1.35, cy + radius), outline=ink, width=5)
+    draw.line((cx - 170, cy + 150, cx + 170, cy + 150), fill=(190, 166, 135), width=3)
     return card
 
 
@@ -125,12 +117,18 @@ def make_calendar_grid() -> Image.Image:
                 font=day_font,
                 fill=day_color,
             )
-    return page.rotate(270, expand=True, resample=Image.Resampling.BICUBIC)
+    # The original UV island is upside down in the current exported model.
+    return page.rotate(90, expand=True, resample=Image.Resampling.BICUBIC)
 
 
 def add_personal_details(atlas: Image.Image, night: bool) -> None:
     quote_size = (QUOTE_BOX[2] - QUOTE_BOX[0], QUOTE_BOX[3] - QUOTE_BOX[1])
-    quote = make_quote_card(quote_size)
+    quote = fitted_photo(
+        SOURCE_DIR / "1-2.png",
+        quote_size,
+        rotate=0,
+        center=(0.5, 0.30),
+    )
     calendar_grid = make_calendar_grid()
     art_size = (CALENDAR_ART_BOX[2] - CALENDAR_ART_BOX[0], CALENDAR_ART_BOX[3] - CALENDAR_ART_BOX[1])
     with Image.open(CALENDAR_ART_PATH) as opened:

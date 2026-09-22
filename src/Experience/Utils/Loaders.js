@@ -22,7 +22,7 @@ export class Loaders {
     this.loaders.textureLoader = new THREE.TextureLoader();
 
     const experience = Experience.getInstance();
-    if (experience.device.isIOS) {
+    if (experience.device.isMobileDevice || experience.device.isIOS) {
       this.loaders.ktx2Loader = new KTX2Loader();
       this.loaders.ktx2Loader.setTranscoderPath("/basis/");
       this.loaders.ktx2Loader.detectSupport(experience.renderer.renderer);

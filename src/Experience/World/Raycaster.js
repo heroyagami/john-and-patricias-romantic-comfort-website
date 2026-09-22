@@ -15,6 +15,17 @@ const HOUSE_DRAG_SENSITIVITY = 0.02;
 const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
 
+const WEDDING_PHOTOS = [
+  // The largest portrait uses a slightly wider UV island than the visible
+  // atlas replacement rectangle. Include its inner frame so taps near the
+  // photo edge also open the lightbox.
+  { src: "/media/wedding-photos/lightbox/1-2.webp", box: [0, 760, 1240, 2020] },
+  { src: "/media/wedding-photos/lightbox/4.webp", box: [2010, 300, 3068, 1088] },
+  { src: "/media/wedding-photos/lightbox/2-1.webp", box: [0, 1904, 1056, 2932] },
+  { src: "/media/wedding-photos/lightbox/7.webp", box: [2424, 2108, 3530, 3120] },
+  { src: "/media/wedding-photos/lightbox/8.webp", box: [2528, 3092, 3640, 4096] },
+];
+
 const CHARACTER_DATA = {
   Fourth_Carl_Raycaster: {
     title: "长久相伴",
@@ -67,12 +78,15 @@ export class Raycaster {
     this._markersVisible = false;
     this._markerData = null;
     this._markersContainer = null;
+    this._inPhotosMode = false;
+    this._photoMesh = null;
 
     this.backBtn = document.getElementById("back-btn");
     this._createDragHint();
     this._createHoverLabel();
     this._createCursorTooltip();
     this._createMessagesBackBtn();
+    this._createPhotoLightbox();
     this._currentHoveredName = null;
     this.modal = new Modal();
 
@@ -80,6 +94,14 @@ export class Raycaster {
       src: ["/audio/music/天外来物.mp3"],
       loop: true,
       volume: 0,
+      html5: true,
+      preload: false,
+    });
+
+    this.music.on("playerror", () => {
+      this.music.once("unlock", () => {
+        if (this.musicPlaying) this._startMusicPlayback();
+      });
     });
 
     this.loadHitboxes();
@@ -200,8 +222,101 @@ export class Raycaster {
           duration: 0.6,
           ease: "power2.out",
         });
+        this.enablePhotoLightbox();
       },
     });
+  }
+
+  _createPhotoLightbox() {
+    const style = document.createElement("style");
+    style.textContent = `
+      .photo-lightbox {
+        position: fixed; inset: 0; z-index: 1200; display: grid;
+        place-items: center; padding: 28px; background: rgba(20, 14, 10, .88);
+        opacity: 0; visibility: hidden; transition: opacity .25s ease;
+      }
+      .photo-lightbox.is-open { opacity: 1; visibility: visible; }
+      .photo-lightbox__image {
+        max-width: min(92vw, 1080px); max-height: 88vh; object-fit: contain;
+        border: 8px solid rgba(255,255,255,.92); box-shadow: 0 22px 70px rgba(0,0,0,.45);
+      }
+      .photo-lightbox__close {
+        position: absolute; top: 18px; right: 20px; width: 44px; height: 44px;
+        border: 0; border-radius: 50%; color: #3e2b20; background: #f5ead8;
+        font: 30px/1 serif; cursor: pointer;
+      }
+      .photo-lightbox__hint {
+        position: absolute; bottom: 14px; color: rgba(255,255,255,.72);
+        font-size: 13px; letter-spacing: .08em;
+      }
+    `;
+    document.head.appendChild(style);
+    this._photoLightbox = document.createElement("div");
+    this._photoLightbox.className = "photo-lightbox";
+    this._photoLightbox.innerHTML = `
+      <button class="photo-lightbox__close" type="button" aria-label="关闭">×</button>
+      <img class="photo-lightbox__image" alt="吴昊与舒倩的婚纱照" decoding="async">
+      <span class="photo-lightbox__hint">点击空白处关闭</span>
+    `;
+    document.body.appendChild(this._photoLightbox);
+    this._photoLightboxImage = this._photoLightbox.querySelector("img");
+    this._photoLightbox.addEventListener("click", (event) => {
+      if (event.target !== this._photoLightboxImage) this.closePhotoLightbox();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") this.closePhotoLightbox();
+    });
+  }
+
+  enablePhotoLightbox() {
+    this._inPhotosMode = true;
+    this._photoMesh = this.experience.world.room?.model?.getObjectByName(
+      "Second_Photos_Baked",
+    );
+    this._onPhotoClick = (event) => {
+      if (!this._inPhotosMode || this._photoLightbox.classList.contains("is-open")) return;
+      const pointer = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1,
+      );
+      this.raycaster.setFromCamera(pointer, this.camera);
+      const hit = this._photoMesh
+        ? this.raycaster.intersectObject(this._photoMesh)[0]
+        : null;
+      if (!hit?.uv) return;
+      const x = hit.uv.x * 4096;
+      const possibleY = [hit.uv.y * 4096, (1 - hit.uv.y) * 4096];
+      const selected = WEDDING_PHOTOS.find(({ box }) =>
+        possibleY.some((y) => x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3]),
+      );
+      if (!selected) return;
+      this._photoLightbox.classList.add("is-open");
+      this.experience.renderPaused = true;
+      this._photoLightboxImage.src = selected.src;
+    };
+    this.canvas.addEventListener("click", this._onPhotoClick);
+  }
+
+  disablePhotoLightbox() {
+    this._inPhotosMode = false;
+    this._photoMesh = null;
+    if (this._onPhotoClick) {
+      this.canvas.removeEventListener("click", this._onPhotoClick);
+      this._onPhotoClick = null;
+    }
+    this.closePhotoLightbox();
+  }
+
+  closePhotoLightbox() {
+    this._photoLightbox?.classList.remove("is-open");
+    this.experience.renderPaused = false;
+    if (this._photoLightboxImage?.src) {
+      window.setTimeout(() => {
+        if (!this._photoLightbox?.classList.contains("is-open")) {
+          this._photoLightboxImage.removeAttribute("src");
+        }
+      }, 260);
+    }
   }
 
   goToCalendar() {
@@ -787,6 +902,7 @@ export class Raycaster {
       this._messagesBackBtn.classList.remove("back-btn--visible");
     }
     if (this._inCharactersMode) this.disableCharacterInteraction();
+    if (this._inPhotosMode) this.disablePhotoLightbox();
     this.disableHouseDrag();
     this.cameraObj.locked = true;
     this.backBtn.classList.remove("back-btn--visible");
@@ -916,11 +1032,15 @@ export class Raycaster {
     } else {
       this.musicPlaying = true;
       if (!this.music.playing()) {
-        this.music.volume(0);
-        this.music.play();
+        this._startMusicPlayback();
       }
       this.music.fade(this.music.volume(), targetVolume, 1500);
     }
+  }
+
+  _startMusicPlayback() {
+    this.music.volume(0);
+    this.music.play();
   }
 
   setDayNightVolume(isNight) {

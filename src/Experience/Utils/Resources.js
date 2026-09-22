@@ -12,7 +12,9 @@ export class Resources extends EventEmitter {
     super();
 
     this.loaders = new Loaders().loaders;
-    this.assets = assets;
+    this.assets = assets.filter((asset) => !asset.defer);
+    this.deferredAssets = assets.filter((asset) => asset.defer);
+    this.deferredPromise = null;
 
     this.items = {};
     this.queue = this.assets.length;
@@ -34,26 +36,47 @@ export class Resources extends EventEmitter {
 
   _loadBatch(batch) {
     for (const asset of batch) {
-      if (asset.type === "glbModel") {
-        this.loaders.gltfLoader.load(asset.path, (file) => {
-          this.singleAssetLoaded(asset.name, file);
-        });
-      } else if (asset.type === "skybox") {
-        this.loaders.cubeTextureLoader.load(asset.path, (file) => {
-          this.singleAssetLoaded(asset.name, file);
-        });
-      } else if (asset.type === "texture") {
-        this.loaders.textureLoader.load(asset.path, (file) => {
-          file.colorSpace = THREE.SRGBColorSpace;
-          this.singleAssetLoaded(asset.name, file);
-        });
-      } else if (asset.type === "ktx2") {
-        this.loaders.ktx2Loader.load(asset.path, (file) => {
-          file.colorSpace = THREE.SRGBColorSpace;
-          this.singleAssetLoaded(asset.name, file);
-        });
-      }
+      this._loadAsset(asset, (file) => this.singleAssetLoaded(asset.name, file));
     }
+  }
+
+  _loadAsset(asset, onLoad, onError) {
+    const completeTexture = (file) => {
+      file.colorSpace = THREE.SRGBColorSpace;
+      onLoad(file);
+    };
+
+    if (asset.type === "glbModel") {
+      this.loaders.gltfLoader.load(asset.path, onLoad, undefined, onError);
+    } else if (asset.type === "skybox") {
+      this.loaders.cubeTextureLoader.load(asset.path, onLoad, undefined, onError);
+    } else if (asset.type === "texture") {
+      this.loaders.textureLoader.load(asset.path, completeTexture, undefined, onError);
+    } else if (asset.type === "ktx2") {
+      this.loaders.ktx2Loader.load(asset.path, completeTexture, undefined, onError);
+    }
+  }
+
+  loadDeferred() {
+    if (this.deferredPromise) return this.deferredPromise;
+
+    this.deferredPromise = Promise.all(
+      this.deferredAssets.map(
+        (asset) =>
+          new Promise((resolve) => {
+            this._loadAsset(
+              asset,
+              (file) => {
+                this.items[asset.name] = file;
+                resolve(file);
+              },
+              () => resolve(null),
+            );
+          }),
+      ),
+    );
+
+    return this.deferredPromise;
   }
 
   singleAssetLoaded(asset, file) {

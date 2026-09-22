@@ -44,14 +44,18 @@ export class Room {
     this.isNight = false;
 
     const items = this.experience.resources.items;
-    this.model.getObjectByName("First_House_Baked")?.removeFromParent();
-
-    const weddingHouse =
-      items.houseReplacement?.scene.getObjectByName("WeddingHouse");
-    if (weddingHouse) {
-      weddingHouse.removeFromParent();
-      this.model.add(weddingHouse);
+    const originalHouseAndDeskProps =
+      this.model.getObjectByName("First_House_Baked");
+    if (originalHouseAndDeskProps) {
+      // The original cottage, cutting mat, desk tools and wall lettering share
+      // one baked mesh. A tiny depth offset tucks the coplanar English lettering
+      // behind the wall while keeping the raised desk props visible.
+      originalHouseAndDeskProps.position.z -= 0.18;
     }
+
+    this.attachWeddingHouse(items.houseReplacement);
+
+    this.createWeddingWallQuote();
 
     const ordinalTextureMap = {
       First: items.firstTexture,
@@ -65,15 +69,33 @@ export class Room {
       Ninth: items.ninthTexture,
     };
     const ordinalNightTextureMap = {
-      First: items.firstNightTexture,
-      Second: items.secondNightTexture,
-      Third: items.thirdNightTexture,
-      Fourth: items.fourthNightTexture,
-      Fifth: items.fifthNightTexture,
-      Sixth: items.sixthNightTexture,
-      Seventh: items.seventhNightTexture,
-      Eighth: items.eighthNightTexture,
-      Ninth: items.ninthNightTexture,
+      First: items.firstNightTexture ?? items.firstTexture,
+      Second: items.secondNightTexture ?? items.secondTexture,
+      Third: items.thirdNightTexture ?? items.thirdTexture,
+      Fourth: items.fourthNightTexture ?? items.fourthTexture,
+      Fifth: items.fifthNightTexture ?? items.fifthTexture,
+      Sixth: items.sixthNightTexture ?? items.sixthTexture,
+      Seventh: items.seventhNightTexture ?? items.seventhTexture,
+      Eighth: items.eighthNightTexture ?? items.eighthTexture,
+      Ninth: items.ninthNightTexture ?? items.ninthTexture,
+    };
+    const storyCardTexture = this.createWeddingAttachmentTexture(
+      "我们的故事",
+      "从相遇，到相守",
+    );
+    const vowCardTexture = this.createWeddingAttachmentTexture(
+      "给彼此的话",
+      "朝暮与年岁并往",
+    );
+    const attachmentTextures = {
+      Ninth_Attachment_John: {
+        day: storyCardTexture,
+        night: storyCardTexture,
+      },
+      Ninth_Attachment_Patricia: {
+        day: vowCardTexture,
+        night: vowCardTexture,
+      },
     };
 
     [
@@ -104,7 +126,7 @@ export class Room {
         .add(texture(this.goboTex, centerUV.add(vec2(r, r))).rgb.mul(0.0625));
     };
 
-    this.model.traverse((obj) => {
+    this._applyWeddingMaterial = (obj) => {
       if (!obj.isMesh) return;
 
       const old = obj.material;
@@ -207,6 +229,7 @@ export class Room {
       const ordinal = obj.name.split("_")[0];
       const ordinalTex = ordinalTextureMap[ordinal];
       const ordinalNightTex = ordinalNightTextureMap[ordinal];
+      const attachmentTexture = attachmentTextures[obj.name];
       const alphaTest = ordinal === "Fourth" ? 0.5 : 0.2;
       const weddingMaterialName = old.name ?? "";
       const weddingPalettes = {
@@ -221,7 +244,15 @@ export class Room {
       };
       const weddingPalette = weddingPalettes[weddingMaterialName];
 
-      if (weddingPalette) {
+      if (attachmentTexture) {
+        this.applyPlanarCardUv(obj);
+        const daySample = texture(attachmentTexture.day, uv());
+        const nightSample = texture(attachmentTexture.night, uv());
+        mat.colorNode = mix(daySample, nightSample, this.uDayNight).rgb.mul(
+          softGobo.min(softGobo2).min(softGobo3),
+        );
+        mat.side = THREE.DoubleSide;
+      } else if (weddingPalette) {
         const surfaceNoise = mx_noise_float(
           positionWorld.mul(weddingPalette.scale),
         )
@@ -267,7 +298,8 @@ export class Room {
 
       old.dispose();
       obj.material = mat;
-    });
+    };
+    this.model.traverse(this._applyWeddingMaterial);
 
     this.experience.scene.add(this.model);
 
@@ -304,6 +336,87 @@ export class Room {
       });
   }
 
+  createWeddingAttachmentTexture(title, subtitle) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+    const paper = "#efe5d2";
+    const ink = "#493b30";
+    const muted = "#80664d";
+    const accent = "#98634c";
+    ctx.fillStyle = paper;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // The paper folds into several visible panels. Repeating a complete,
+    // restrained title in each quadrant keeps every fold readable.
+    for (let row = 0; row < 2; row += 1) {
+      for (let col = 0; col < 2; col += 1) {
+        const x = col * 256;
+        const y = row * 256;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, 256, 256);
+        ctx.clip();
+        ctx.strokeStyle = "rgba(128,102,77,.18)";
+        ctx.lineWidth = 1;
+        for (let line = 28; line < 250; line += 21) {
+          ctx.beginPath();
+          ctx.moveTo(x + 14, y + line);
+          ctx.lineTo(x + 242, y + line);
+          ctx.stroke();
+        }
+        ctx.fillStyle = accent;
+        ctx.font = '600 26px "Noto Serif SC", "Songti SC", serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(title, x + 128, y + 110);
+        ctx.fillStyle = ink;
+        ctx.font = '15px "Noto Serif SC", "Songti SC", serif';
+        ctx.fillText(subtitle, x + 128, y + 146);
+        ctx.fillStyle = muted;
+        ctx.font = '11px "Noto Serif SC", serif';
+        ctx.fillText("2026.10.02", x + 128, y + 176);
+        ctx.restore();
+      }
+    }
+
+    const canvasTexture = new THREE.CanvasTexture(canvas);
+    canvasTexture.colorSpace = THREE.SRGBColorSpace;
+    canvasTexture.flipY = false;
+    canvasTexture.generateMipmaps = false;
+    canvasTexture.minFilter = THREE.LinearFilter;
+    canvasTexture.anisotropy = 4;
+    return canvasTexture;
+  }
+
+  applyPlanarCardUv(mesh) {
+    mesh.geometry = mesh.geometry.clone();
+    const geometry = mesh.geometry;
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox;
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const axes = ["x", "y", "z"].sort((a, b) => size[b] - size[a]);
+    const [uAxis, vAxis] = axes;
+    const positions = geometry.attributes.position;
+    const uvs = new Float32Array(positions.count * 2);
+    const uSize = size[uAxis] || 1;
+    const vSize = size[vAxis] || 1;
+    const component = (attribute, index, axis) =>
+      axis === "x"
+        ? attribute.getX(index)
+        : axis === "y"
+          ? attribute.getY(index)
+          : attribute.getZ(index);
+    for (let i = 0; i < positions.count; i += 1) {
+      uvs[i * 2] = (component(positions, i, uAxis) - box.min[uAxis]) / uSize;
+      uvs[i * 2 + 1] =
+        (component(positions, i, vAxis) - box.min[vAxis]) / vSize;
+    }
+    geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+  }
+
   toggleDayNight() {
     this.isNight = !this.isNight;
     gsap.to(this.uDayNight, {
@@ -336,6 +449,127 @@ export class Room {
         ease: "power2.inOut",
       });
     }
+  }
+
+  attachWeddingHouse(gltf) {
+    const weddingHouse = gltf?.scene.getObjectByName("WeddingHouse");
+    if (!weddingHouse || weddingHouse.parent === this.model) return;
+
+    weddingHouse.removeFromParent();
+    this.model.add(weddingHouse);
+    const originalHouseAndDeskProps =
+      this.model.getObjectByName("First_House_Baked");
+    this.removeOriginalHouseGeometry(originalHouseAndDeskProps, weddingHouse);
+    if (this._applyWeddingMaterial) {
+      weddingHouse.traverse(this._applyWeddingMaterial);
+    }
+  }
+
+  removeOriginalHouseGeometry(originalMesh, replacementHouse) {
+    if (!originalMesh?.isMesh || !replacementHouse) return;
+
+    this.model.updateMatrixWorld(true);
+    const replacementBounds = new THREE.Box3().setFromObject(replacementHouse);
+    const replacementSize = replacementBounds.getSize(new THREE.Vector3());
+    replacementBounds.expandByVector(
+      new THREE.Vector3(
+        replacementSize.x * 0.12,
+        0,
+        replacementSize.z * 0.12,
+      ),
+    );
+
+    // First_House_Baked also contains the teal cutting mat, scissors and the
+    // other coloured desk props. Keep those triangles and remove only the old
+    // cottage volume so the replacement house can sit on the original mat.
+    const geometry = originalMesh.geometry;
+    const positions = geometry.attributes.position;
+    const sourceIndex = geometry.index
+      ? Array.from(geometry.index.array)
+      : Array.from({ length: positions.count }, (_, index) => index);
+    const keptIndex = [];
+    const a = new THREE.Vector3();
+    const b = new THREE.Vector3();
+    const c = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    const matHeight = replacementBounds.min.y + replacementSize.y * 0.015;
+
+    for (let i = 0; i < sourceIndex.length; i += 3) {
+      a.fromBufferAttribute(positions, sourceIndex[i]).applyMatrix4(
+        originalMesh.matrixWorld,
+      );
+      b.fromBufferAttribute(positions, sourceIndex[i + 1]).applyMatrix4(
+        originalMesh.matrixWorld,
+      );
+      c.fromBufferAttribute(positions, sourceIndex[i + 2]).applyMatrix4(
+        originalMesh.matrixWorld,
+      );
+      center.copy(a).add(b).add(c).multiplyScalar(1 / 3);
+
+      const belongsToOldHouse =
+        center.y > matHeight &&
+        center.x > replacementBounds.min.x &&
+        center.x < replacementBounds.max.x &&
+        center.z > replacementBounds.min.z &&
+        center.z < replacementBounds.max.z;
+
+      if (!belongsToOldHouse) {
+        keptIndex.push(
+          sourceIndex[i],
+          sourceIndex[i + 1],
+          sourceIndex[i + 2],
+        );
+      }
+    }
+
+    geometry.setIndex(keptIndex);
+    geometry.computeBoundingSphere();
+  }
+
+  createWeddingWallQuote() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1024;
+    canvas.height = 420;
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#4f3424";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.font = '92px "STKaiti", "KaiTi", serif';
+    context.fillText("从今往后", canvas.width / 2, 118);
+    context.fillText("朝暮与共", canvas.width / 2, 245);
+    context.strokeStyle = "rgba(79, 52, 36, 0.72)";
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(330, 340);
+    context.quadraticCurveTo(512, 375, 694, 340);
+    context.stroke();
+
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.needsUpdate = true;
+    const material = new THREE.SpriteMaterial({
+      map,
+      transparent: true,
+      depthWrite: false,
+    });
+    const quote = new THREE.Sprite(material);
+    quote.name = "Wedding_Wall_Quote";
+
+    // Project the requested screen location onto the back wall. The resulting
+    // world point stays fixed when the camera later moves around the room.
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(
+      new THREE.Vector2(-0.38, -0.34),
+      this.experience.camera.instance,
+    );
+    const wall = new THREE.Plane(new THREE.Vector3(0, 0, 1), 30.25);
+    const target = new THREE.Vector3();
+    if (!raycaster.ray.intersectPlane(wall, target)) return;
+    target.z += 0.06;
+    quote.position.copy(target);
+    quote.scale.set(5.6, 2.3, 1);
+    this.model.add(quote);
   }
 
   resize() {}

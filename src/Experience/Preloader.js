@@ -18,13 +18,19 @@ export class Preloader extends EventEmitter {
       ".preloader__progress-wrapper",
     );
     this.introEl = document.querySelector(".preloader__intro");
+    this.enterBtn = document.getElementById("enter-btn");
+    this.silentBtn = document.getElementById("enter-silent-btn");
+    this.sceneReady = false;
+    this._setButtonsReady(false);
 
-    document.getElementById("enter-btn").addEventListener("click", () => {
+    this.enterBtn.addEventListener("click", () => {
       this.experience.world.raycaster?.toggleMusic();
+      this._loadDeferredScene();
       this._dismiss();
     });
 
-    document.getElementById("enter-silent-btn").addEventListener("click", () => {
+    this.silentBtn.addEventListener("click", () => {
+      this._loadDeferredScene();
       this._dismiss();
     });
 
@@ -33,14 +39,25 @@ export class Preloader extends EventEmitter {
     });
 
     this.resources.on("ready", () => {
-      this.playOutro();
+      this.sceneReady = true;
+      this._setButtonsReady(true);
     });
+
+    requestAnimationFrame(() => this.playOutro());
   }
 
   onLoad(value) {
     const pct = Math.round(value * 100);
     this.progressBar.style.width = `${pct}%`;
     this.percentText.textContent = `${pct}%`;
+    if (!this.sceneReady) this.enterBtn.textContent = `场景加载中 ${pct}%`;
+  }
+
+  _setButtonsReady(ready) {
+    this.enterBtn.disabled = !ready;
+    this.silentBtn.disabled = !ready;
+    this.enterBtn.textContent = ready ? "进入我们的婚礼" : "场景加载中 0%";
+    this.silentBtn.textContent = ready ? "静音进入" : "请稍候";
   }
 
   playOutro() {
@@ -70,6 +87,13 @@ export class Preloader extends EventEmitter {
         this.preloader.remove();
         this.emit("preloaderfinished");
       },
+    });
+  }
+
+  _loadDeferredScene() {
+    this.resources.loadDeferred().then(() => {
+      const house = this.resources.items.houseReplacement;
+      if (house) this.experience.world.room?.attachWeddingHouse(house);
     });
   }
 }

@@ -69,7 +69,7 @@ export class Experience {
 
   update() {
     this.world.update();
-    this.renderer.update();
+    if (!this.renderPaused) this.renderer.update();
     this.camera.update();
     this.raycaster.update();
     // this.controls.update();
