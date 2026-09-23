@@ -307,7 +307,10 @@ export class Raycaster {
     if (!hit?.uv) return null;
 
     const x = hit.uv.x * 4096;
-    const y = (1 - hit.uv.y) * 4096;
+    // Raycast UVs already match the atlas coordinates used by the baked room
+    // mesh. Flipping Y here swaps the vertically paired frames (1/2 and 3/4)
+    // and moves frame 5 outside its hit area.
+    const y = hit.uv.y * 4096;
     return (
       WEDDING_PHOTOS.find(
         ({ box }) =>
