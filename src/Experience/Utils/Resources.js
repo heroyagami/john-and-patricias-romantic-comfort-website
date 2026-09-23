@@ -4,8 +4,11 @@ import { EventEmitter } from "events";
 import { Loaders } from "./Loaders";
 import assets from "./assets";
 
-const BATCH_SIZE = 4;
-const BATCH_DELAY = 150; // ms between batches
+// Modern mobile browsers can sustain six parallel requests per origin. Keep
+// batches within that limit but avoid adding nearly half a second of artificial
+// delay before the final scene textures even start downloading.
+const BATCH_SIZE = 6;
+const BATCH_DELAY = 60; // ms between batches
 
 export class Resources extends EventEmitter {
   constructor() {

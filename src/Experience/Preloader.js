@@ -41,6 +41,12 @@ export class Preloader extends EventEmitter {
     this.resources.on("ready", () => {
       this.sceneReady = true;
       this._setButtonsReady(true);
+      const warmHouse = () => this._loadDeferredScene();
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(warmHouse, { timeout: 1500 });
+      } else {
+        window.setTimeout(warmHouse, 500);
+      }
     });
 
     requestAnimationFrame(() => this.playOutro());
@@ -99,11 +105,19 @@ export class Preloader extends EventEmitter {
     this.silentBtn.textContent = "请稍候";
 
     try {
-      await this.resources.loadDeferred();
-      const house = this.resources.items.houseReplacement;
-      if (house) this.experience.world.room?.attachWeddingHouse(house);
+      await this._loadDeferredScene();
     } catch (error) {
       console.warn("Unable to load the replacement house", error);
     }
+  }
+
+  _loadDeferredScene() {
+    if (this.deferredScenePromise) return this.deferredScenePromise;
+
+    this.deferredScenePromise = this.resources.loadDeferred().then(() => {
+      const house = this.resources.items.houseReplacement;
+      if (house) this.experience.world.room?.attachWeddingHouse(house);
+    });
+    return this.deferredScenePromise;
   }
 }
