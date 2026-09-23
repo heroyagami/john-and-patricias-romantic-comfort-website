@@ -21,7 +21,7 @@ const WEDDING_PHOTOS = [
   // near an edge work reliably on small phone screens.
   { src: "/media/wedding-photos/lightbox/4.webp", box: [1840, 180, 3260, 1280] },
   { src: "/media/wedding-photos/lightbox/2-1.webp", box: [0, 1904, 1056, 2932] },
-  { src: "/media/wedding-photos/lightbox/7.webp", box: [2220, 1900, 3740, 3090] },
+  { src: "/media/wedding-photos/lightbox/1-2.webp", box: [2220, 1900, 3740, 3090] },
   { src: "/media/wedding-photos/lightbox/8.webp", box: [2320, 3090, 3890, 4096] },
 ];
 
@@ -287,7 +287,7 @@ export class Raycaster {
       const possibleY = [hit.uv.y * 4096, (1 - hit.uv.y) * 4096];
       const selected = WEDDING_PHOTOS.find(({ box }) =>
         possibleY.some((y) => x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3]),
-      ) ?? { src: "/media/wedding-photos/lightbox/1-2.webp" };
+      ) ?? { src: "/media/wedding-photos/lightbox/7.webp" };
       this._photoLightbox.classList.add("is-open");
       this.experience.renderPaused = true;
       this._photoLightboxImage.src = selected.src;

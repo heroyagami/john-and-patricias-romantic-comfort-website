@@ -4,9 +4,9 @@ const isIOS =
 const isMobile = isIOS || /Android|Mobile/i.test(navigator.userAgent);
 
 const ext = isMobile ? "ktx2" : "webp";
-const weddingPhotoVersion = "20260921-1";
+const weddingPhotoVersion = "20260923-2";
 const weddingStoryVersion = "20260921-1";
-const mobileTextureVersion = "20260922-1";
+const mobileTextureVersion = "20260923-2";
 const dayTexturePath = (name, desktopVersion = "") =>
   isMobile
     ? `/textures/mobile/${name}_day.webp?v=${mobileTextureVersion}`

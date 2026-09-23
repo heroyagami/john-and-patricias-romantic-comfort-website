@@ -20,7 +20,7 @@ SLOTS = [
     # These two UV islands extend farther to the right than the original
     # replacement rectangles. Cover the full islands to eliminate the visible
     # strip between each print and its frame.
-    {"source": "7.png", "box": (2424, 2108, 3530, 3120), "rotate": 270, "center": (0.5, 0.43)},
+    {"source": "1-2.png", "box": (2424, 2108, 3530, 3120), "rotate": 270, "center": (0.5, 0.43)},
     {"source": "8.png", "box": (2528, 3092, 3640, 4096), "rotate": 270, "center": (0.5, 0.12)},
 ]
 
@@ -124,7 +124,7 @@ def make_calendar_grid() -> Image.Image:
 def add_personal_details(atlas: Image.Image, night: bool) -> None:
     quote_size = (QUOTE_BOX[2] - QUOTE_BOX[0], QUOTE_BOX[3] - QUOTE_BOX[1])
     quote = fitted_photo(
-        SOURCE_DIR / "1-2.png",
+        SOURCE_DIR / "7.png",
         quote_size,
         rotate=0,
         center=(0.5, 0.30),
