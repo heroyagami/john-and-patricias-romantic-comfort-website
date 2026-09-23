@@ -16,10 +16,6 @@ const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
 
 const WEDDING_PHOTOS = [
-  // The largest portrait uses a slightly wider UV island than the visible
-  // atlas replacement rectangle. Include its inner frame so taps near the
-  // photo edge also open the lightbox.
-  { src: "/media/wedding-photos/lightbox/1-2.webp", box: [0, 760, 1240, 2020] },
   // The three frames on the right have bevelled borders whose UVs extend
   // beyond the visible photo rectangles. Include the complete frames so taps
   // near an edge work reliably on small phone screens.
@@ -291,8 +287,7 @@ export class Raycaster {
       const possibleY = [hit.uv.y * 4096, (1 - hit.uv.y) * 4096];
       const selected = WEDDING_PHOTOS.find(({ box }) =>
         possibleY.some((y) => x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3]),
-      );
-      if (!selected) return;
+      ) ?? { src: "/media/wedding-photos/lightbox/1-2.webp" };
       this._photoLightbox.classList.add("is-open");
       this.experience.renderPaused = true;
       this._photoLightboxImage.src = selected.src;
