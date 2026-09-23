@@ -23,14 +23,14 @@ export class Preloader extends EventEmitter {
     this.sceneReady = false;
     this._setButtonsReady(false);
 
-    this.enterBtn.addEventListener("click", () => {
+    this.enterBtn.addEventListener("click", async () => {
       this.experience.world.raycaster?.toggleMusic();
-      this._loadDeferredScene();
+      await this._prepareDeferredScene();
       this._dismiss();
     });
 
-    this.silentBtn.addEventListener("click", () => {
-      this._loadDeferredScene();
+    this.silentBtn.addEventListener("click", async () => {
+      await this._prepareDeferredScene();
       this._dismiss();
     });
 
@@ -90,10 +90,20 @@ export class Preloader extends EventEmitter {
     });
   }
 
-  _loadDeferredScene() {
-    this.resources.loadDeferred().then(() => {
+  async _prepareDeferredScene() {
+    if (this.entering) return;
+    this.entering = true;
+    this.enterBtn.disabled = true;
+    this.silentBtn.disabled = true;
+    this.enterBtn.textContent = "正在布置新房…";
+    this.silentBtn.textContent = "请稍候";
+
+    try {
+      await this.resources.loadDeferred();
       const house = this.resources.items.houseReplacement;
       if (house) this.experience.world.room?.attachWeddingHouse(house);
-    });
+    } catch (error) {
+      console.warn("Unable to load the replacement house", error);
+    }
   }
 }
