@@ -16,13 +16,15 @@ const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
 
 const WEDDING_PHOTOS = [
-  // The three frames on the right have bevelled borders whose UVs extend
-  // beyond the visible photo rectangles. Include the complete frames so taps
-  // near an edge work reliably on small phone screens.
-  { src: "/media/wedding-photos/lightbox/4.webp", box: [1840, 180, 3260, 1280] },
+  { src: "/media/wedding-photos/lightbox/4.webp", box: [2010, 300, 3068, 1088] },
+  {
+    src: "/media/wedding-photos/lightbox/2-1.webp",
+    box: [0, 872, 1022, 1888],
+    directFromHome: true,
+  },
   { src: "/media/wedding-photos/lightbox/1-2.webp", box: [0, 1904, 1056, 2932] },
-  { src: "/media/wedding-photos/lightbox/7.webp", box: [2220, 1900, 3740, 3090] },
-  { src: "/media/wedding-photos/lightbox/8.webp", box: [2320, 3090, 3890, 4096] },
+  { src: "/media/wedding-photos/lightbox/7.webp", box: [2424, 2108, 3530, 3091] },
+  { src: "/media/wedding-photos/lightbox/8.webp", box: [2528, 3092, 3640, 4096] },
 ];
 
 const CHARACTER_DATA = {
@@ -166,6 +168,16 @@ export class Raycaster {
       }
 
       this.raycaster.setFromCamera(this.mouse.instance, this.camera);
+
+      // The large photo on the right is already clearly visible from the home
+      // view, so let guests open it directly without first zooming into the
+      // complete photo wall.
+      const directPhoto = this._getPhotoFromCurrentRay();
+      if (directPhoto?.directFromHome) {
+        this._openPhotoLightbox(directPhoto.src);
+        return;
+      }
+
       const intersects = this.raycaster.intersectObjects(this.meshes);
       if (!intersects.length) return;
 
@@ -279,25 +291,35 @@ export class Raycaster {
         -(event.clientY / window.innerHeight) * 2 + 1,
       );
       this.raycaster.setFromCamera(pointer, this.camera);
-      const hit = this._photoMesh
-        ? this.raycaster.intersectObject(this._photoMesh)[0]
-        : null;
-      if (!hit?.uv) return;
-      const x = hit.uv.x * 4096;
-      // TextureLoader displays this atlas with flipY enabled, while raycast UVs
-      // are returned in the mesh's original orientation. Convert once to atlas
-      // pixel coordinates; checking both directions makes vertically mirrored
-      // slots overlap and can open the wrong photo.
-      const y = (1 - hit.uv.y) * 4096;
-      const selected = WEDDING_PHOTOS.find(
-        ({ box }) =>
-          x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3],
-      ) ?? { src: "/media/wedding-photos/lightbox/2-1.webp" };
-      this._photoLightbox.classList.add("is-open");
-      this.experience.renderPaused = true;
-      this._photoLightboxImage.src = selected.src;
+      const selected = this._getPhotoFromCurrentRay();
+      if (selected) this._openPhotoLightbox(selected.src);
     };
     this.canvas.addEventListener("click", this._onPhotoClick);
+  }
+
+  _getPhotoFromCurrentRay() {
+    this._photoMesh ??= this.experience.world.room?.model?.getObjectByName(
+      "Second_Photos_Baked",
+    );
+    const hit = this._photoMesh
+      ? this.raycaster.intersectObject(this._photoMesh)[0]
+      : null;
+    if (!hit?.uv) return null;
+
+    const x = hit.uv.x * 4096;
+    const y = (1 - hit.uv.y) * 4096;
+    return (
+      WEDDING_PHOTOS.find(
+        ({ box }) =>
+          x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3],
+      ) ?? null
+    );
+  }
+
+  _openPhotoLightbox(src) {
+    this._photoLightbox.classList.add("is-open");
+    this.experience.renderPaused = true;
+    this._photoLightboxImage.src = src;
   }
 
   disablePhotoLightbox() {
