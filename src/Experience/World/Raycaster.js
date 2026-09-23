@@ -20,10 +20,13 @@ const WEDDING_PHOTOS = [
   // atlas replacement rectangle. Include its inner frame so taps near the
   // photo edge also open the lightbox.
   { src: "/media/wedding-photos/lightbox/1-2.webp", box: [0, 760, 1240, 2020] },
-  { src: "/media/wedding-photos/lightbox/4.webp", box: [2010, 300, 3068, 1088] },
+  // The three frames on the right have bevelled borders whose UVs extend
+  // beyond the visible photo rectangles. Include the complete frames so taps
+  // near an edge work reliably on small phone screens.
+  { src: "/media/wedding-photos/lightbox/4.webp", box: [1840, 180, 3260, 1280] },
   { src: "/media/wedding-photos/lightbox/2-1.webp", box: [0, 1904, 1056, 2932] },
-  { src: "/media/wedding-photos/lightbox/7.webp", box: [2424, 2108, 3530, 3120] },
-  { src: "/media/wedding-photos/lightbox/8.webp", box: [2528, 3092, 3640, 4096] },
+  { src: "/media/wedding-photos/lightbox/7.webp", box: [2220, 1900, 3740, 3090] },
+  { src: "/media/wedding-photos/lightbox/8.webp", box: [2320, 3090, 3890, 4096] },
 ];
 
 const CHARACTER_DATA = {
