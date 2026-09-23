@@ -284,9 +284,14 @@ export class Raycaster {
         : null;
       if (!hit?.uv) return;
       const x = hit.uv.x * 4096;
-      const possibleY = [hit.uv.y * 4096, (1 - hit.uv.y) * 4096];
-      const selected = WEDDING_PHOTOS.find(({ box }) =>
-        possibleY.some((y) => x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3]),
+      // TextureLoader displays this atlas with flipY enabled, while raycast UVs
+      // are returned in the mesh's original orientation. Convert once to atlas
+      // pixel coordinates; checking both directions makes vertically mirrored
+      // slots overlap and can open the wrong photo.
+      const y = (1 - hit.uv.y) * 4096;
+      const selected = WEDDING_PHOTOS.find(
+        ({ box }) =>
+          x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3],
       ) ?? { src: "/media/wedding-photos/lightbox/2-1.webp" };
       this._photoLightbox.classList.add("is-open");
       this.experience.renderPaused = true;
